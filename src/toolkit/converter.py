@@ -1,4 +1,4 @@
-from errors import ConversionError
+from toolkit.errors import ConversionError
 
 units_of_measurument = {
     'distance': {
@@ -15,6 +15,19 @@ units_of_measurument = {
 units_of_temperature = {'c', 'f', 'k'}
 
 def convert (value, from_unit, to_unit):
+    """
+    Перевод введенной величины из одной единицы измерения в другую.
+
+    Аргументы:
+        value (float): Величина, которую нужно будет перевести.
+        from_unit (str): Исходная единица измерения.
+        to_unit (str): Единица измерения, в которую пользователю нужно перевести величину.
+    Возвращает:
+        float: Переведенная величина.
+    Исключения:
+        ConversionError: Неверное числовое обозначение исходной величины, попытка перевести температуру ниже абсолютного нуля,
+                        нессответствие единиц измерения.
+    """
     from_unit = from_unit.lower()
     to_unit = to_unit.lower()
 
@@ -30,7 +43,7 @@ def convert (value, from_unit, to_unit):
                 if to_unit == 'f':
                     return value * 9 / 5 + 32
                 if to_unit == 'k':
-                    return value + 273
+                    return value + 273.15
             else:
                 raise ConversionError('Температура ниже абсолютного нуля запрещена.')
         elif from_unit == 'f':
@@ -40,21 +53,21 @@ def convert (value, from_unit, to_unit):
                 if to_unit == 'f':
                     return value
                 if to_unit == 'k':
-                    return (value - 32) * 5 / 9 + 273
+                    return (value - 32) * 5 / 9 + 273.15
             else:
                 raise ConversionError('Температура ниже абсолютного нуля запрещена.')
         elif from_unit == 'k':
             if value >= 0:
                 if to_unit == 'c':
-                    return value - 273
+                    return value - 273.15
                 if to_unit == 'k':
                     return value
                 if to_unit == 'f':
-                    return (value - 32) * 5 / 9 + 273
+                    return (value - 32) * 5 / 9 + 273.15
             else:
                 raise ConversionError('Температура ниже абсолютного нуля запрещена.')
-    elif from_unit in units_of_measurument['length'] and to_unit in units_of_measurument['length']:
-        units = units_of_measurument['length']
+    elif from_unit in units_of_measurument['distance'] and to_unit in units_of_measurument['distance']:
+        units = units_of_measurument['distance']
         return (value * units[from_unit] / units[to_unit])
     elif from_unit in units_of_measurument['mass'] and to_unit in units_of_measurument['mass']:
         units = units_of_measurument['mass']

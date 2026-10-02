@@ -1,5 +1,19 @@
-from errors import DivisionByZero, ValidationError
+from toolkit.errors import DivisionByZero
+from toolkit.errors import ValidationError
+
+
 def tokenize(expression):
+    """
+    Разбивает исходную строку на отдельные элементы.
+    Удаляет пробелы и объединяет знаки унарного плюса и минуса с числами, к которым они относятся.
+
+    Аргументы:
+        expression (str): Строка с арифметическим выражением.
+    Вывод:
+        tokens (list): Список строк-токенов.
+    Исключения:
+        ValidationError: Если в строке обнаружен недопустимый символ.
+    """
     s = expression.replace(' ', '')
     tokens = []
     i = 0
@@ -17,7 +31,7 @@ def tokenize(expression):
             i += 1
             continue
         elif char in '+-*/':
-            if char in '+-' and (i == 0 or s[i-1] in '+-*/'):
+            if char in '+-' and (i == 0 or s[i-1] in '+-*/('):
                 number = char
                 i += 1
                 while i < len(s) and (s[i].isdigit() or s[i] == '.'):
@@ -35,13 +49,25 @@ def tokenize(expression):
     return tokens
 
 def validate(expression):
+    """
+    Проверяет математическое выражение на корректность структуры и синтаксис.
+    Анализирует расстановку скобок, проверяет, нет ли лишних скобок во введенном выражении.
+
+    Аргументы:
+        expression (str): Строка с математическим выражением.
+    Возвращает:
+        bool: True, если выражение корректно.
+    Исключения:
+        ValidationError: Если выражение пустое, нарушен баланс скобок,
+                        знаки операций стоят в недопустимых местах или рядом.
+    """
     tokens = tokenize(expression)
     if not tokens:
         raise ValidationError("Выражение не может быть пустым")
     allowed_chars = '+-*/()'
     binary_operators = ['+', '-', '*', '/']
     for token in tokens:
-        is_number = token.replace('.', '', 1).replace('-', '', 1).isdigit()
+        is_number = token.replace('.', '', 1).replace('-', '', 1).replace('+', '', 1).isdigit()
         is_operation = token in allowed_chars
         if not (is_number or is_operation):
             raise ValidationError(f'Недопустимый символ или формат числа: {token}')
@@ -69,6 +95,14 @@ def validate(expression):
     return True
 
 def to_polish_notation(tokens):
+    """
+    Переводит введенные токены в формат обратной польской нотации (постфиксную запись).
+
+    Аргументы:
+        tokens (list): Исходные упорядоченный список токенов.
+    Возвращает:
+        list: Список токенов, перестроенный в виде постфиксной записи.
+    """
     priority = {
         '+': 1,
         '-': 1,
@@ -96,6 +130,17 @@ def to_polish_notation(tokens):
     return output_string
 
 def calculate(postfix_tokens):
+    """
+    Вычисляет итоговый результат выражения, записанного в виде обратной польской нотации.
+
+    Аргументы:
+        postfix_tokens (list): Список токенов в формате обратной польской нотации.
+    Возвращает:
+        float: Итоговый результат вычисления математического выражения.
+    Исключения:
+        ValidationError: Если в стеке недостаточно аргументов для подсчета или остались лишние.
+        DivisionByZero: При попытке деления на 0.
+    """
     stack = []
     for token in postfix_tokens:
         if token in '+-*/':
